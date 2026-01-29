@@ -1,26 +1,50 @@
-import ChatInterface from '@/components/ChatInterface';
-import RLInterface from '@/components/RLInterface';
+import Link from 'next/link';
+import { Bot, Activity, ArrowRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 export default function Home() {
   return (
-    <main className="h-screen w-full bg-gradient-to-br from-background via-background/95 to-secondary/30 text-foreground overflow-hidden flex flex-col">
-      <header className="px-6 py-4 border-b bg-background/60 backdrop-blur-md flex items-center justify-between sticky top-0 z-50">
-        <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-purple-600">
-          AI Sandbox <span className="text-xs font-normal text-muted-foreground opacity-70 ml-2">v0.2.0 • Phase 2</span>
-        </h1>
-        <div className="text-xs text-muted-foreground font-mono">
-          System: Ready
-        </div>
-      </header>
-
-      <div className="flex-1 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
-        <div className="lg:col-span-7 h-full min-h-[500px]">
-          <ChatInterface />
-        </div>
-        <div className="lg:col-span-5 h-full min-h-[400px]">
-          <RLInterface />
-        </div>
+    <div className="p-8 max-w-5xl mx-auto space-y-8">
+      <div className="space-y-2">
+        <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl">Welcome to AI Sandbox</h1>
+        <p className="text-xl text-muted-foreground">Select a module to begin your research.</p>
       </div>
-    </main>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Link href="/agents" className="block group">
+          <Card className="h-full border-primary/20 hover:border-primary transition-all hover:shadow-lg bg-card/50 backdrop-blur-sm group-hover:-translate-y-1">
+            <CardHeader>
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <Bot size={24} />
+              </div>
+              <CardTitle className="text-2xl">Agents & LLMs</CardTitle>
+              <CardDescription>Chat with advanced ReAct agents using tools like Calculator and Search.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center text-primary font-medium text-sm">
+                Enter Playground <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/rl" className="block group">
+          <Card className="h-full border-primary/20 hover:border-primary transition-all hover:shadow-lg bg-card/50 backdrop-blur-sm group-hover:-translate-y-1">
+            <CardHeader>
+              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <Activity size={24} />
+              </div>
+              <CardTitle className="text-2xl">RL Environments</CardTitle>
+              <CardDescription>Train agents in Gymnasium or custom environments with full visualization.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center text-primary font-medium text-sm">
+                Enter Arena <ArrowRight size={16} className="ml-2 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+    </div>
   );
 }
