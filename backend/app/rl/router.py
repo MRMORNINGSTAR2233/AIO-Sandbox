@@ -17,6 +17,27 @@ class StepRequest(BaseModel):
 def list_envs():
     return {"envs": env_manager.list_envs()}
 
+from fastapi import UploadFile, File
+import shutil
+import os
+
+@router.post("/upload")
+async def upload_env(file: UploadFile = File(...)):
+    upload_dir = "custom_envs"
+    os.makedirs(upload_dir, exist_ok=True)
+    file_path = os.path.join(upload_dir, file.filename)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    # Attempt to register
+    module_name = file.filename.replace(".py", "")
+    # In a real app, we'd parse the file to find the Env ID or Class
+    # For now, we just load it and acknowledge.
+    env_manager.register_custom_env(file_path, module_name, "CustomEnv-v0")
+    
+    return {"status": "uploaded", "filename": file.filename}
+
 @router.post("/create")
 def create_env(request: CreateEnvRequest):
     try:

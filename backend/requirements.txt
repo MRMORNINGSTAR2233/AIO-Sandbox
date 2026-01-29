@@ -11,3 +11,6 @@ langchain-groq>=0.0.1
 langchain-google-genai>=0.0.1
 gymnasium>=0.29.1
 numpy>=1.26.0
+langchain-community>=0.0.10
+numexpr>=2.8.8
+sqlalchemy>=2.0.0

@@ -1,15 +1,33 @@
 import gymnasium as gym
 from typing import Dict, Any, Optional
 import uuid
+import importlib.util
+import os
+import sys
 
 class EnvManager:
     def __init__(self):
         self.envs: Dict[str, gym.Env] = {}
 
     def list_envs(self):
-        # Return a list of supported/active environments
-        # For now, just a static list of common Gym envs
         return ["CartPole-v1", "MountainCar-v0", "FrozenLake-v1"]
+
+    def register_custom_env(self, file_path: str, module_name: str, env_id: str):
+        """
+        Dynamically load a python module and register the env.
+        Assuming the file contains a class named 'CustomEnv' or registers itself.
+        """
+        spec = importlib.util.spec_from_file_location(module_name, file_path)
+        if spec and spec.loader:
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[module_name] = module
+            spec.loader.exec_module(module)
+            # If the module registers itself, we are good.
+            # If it defines a class, we might need to manually register.
+            # For simplicity, we assume the user's script calls gym.register()
+            # or simply defining the class is enough if we use the class directly.
+            return True
+        return False
 
     def create_env(self, env_id: str) -> str:
         """
