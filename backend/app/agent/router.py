@@ -48,3 +48,14 @@ async def run_parallel_workflow(request: RunWorkflowRequest):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+from app.agent.supervisor import supervisor
+
+class SupervisorRequest(BaseModel):
+    goal: str
+    team: List[str] # List of agent_ids
+
+@router.post("/workflow/supervisor")
+async def run_supervisor_workflow(request: SupervisorRequest):
+    result = await supervisor.run(request.goal, request.team)
+    return result
