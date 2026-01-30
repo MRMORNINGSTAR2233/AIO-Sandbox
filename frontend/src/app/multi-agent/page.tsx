@@ -56,10 +56,16 @@ export default function MultiAgentPage() {
         }
     };
 
+    const [workflowType, setWorkflowType] = useState("sequential"); // 'sequential' or 'parallel'
+
     const runWorkflow = async () => {
         try {
             setWorkflowResult(null);
-            const res = await fetch("http://localhost:8000/agents/workflow/sequential", {
+            const endpoint = workflowType === "parallel"
+                ? "http://localhost:8000/agents/workflow/parallel"
+                : "http://localhost:8000/agents/workflow/sequential";
+
+            const res = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "X-Sandbox-Key": "sandbox-secret" },
                 body: JSON.stringify({
@@ -132,6 +138,17 @@ export default function MultiAgentPage() {
                             <CardHeader><CardTitle>Workflow Configuration</CardTitle></CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
+                                    <h4 className="text-sm font-medium mb-2">Workflow Mode</h4>
+                                    <div className="flex gap-4 mb-4">
+                                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="radio" name="wtype" checked={workflowType === 'sequential'} onChange={() => setWorkflowType('sequential')} />
+                                            Sequential (Chain)
+                                        </label>
+                                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input type="radio" name="wtype" checked={workflowType === 'parallel'} onChange={() => setWorkflowType('parallel')} />
+                                            Parallel (All at once)
+                                        </label>
+                                    </div>
                                     <h4 className="text-sm font-medium mb-2">Initial Input</h4>
                                     <Input placeholder="Start the chain with..." value={initialInput} onChange={e => setInitialInput(e.target.value)} />
                                 </div>
@@ -184,16 +201,26 @@ export default function MultiAgentPage() {
                             <CardContent className="flex-1 overflow-auto font-mono text-sm space-y-4 p-4">
                                 {workflowResult ? (
                                     <>
-                                        {workflowResult.trace.map((step: any, i: number) => (
+                                        {workflowType === 'sequential' && workflowResult.trace && workflowResult.trace.map((step: any, i: number) => (
                                             <div key={i} className="p-3 bg-black/20 rounded-lg border border-border/50">
                                                 <div className="text-primary font-bold mb-1">Step {step.step}: {step.agent}</div>
                                                 <div className="whitespace-pre-wrap text-muted-foreground">{step.output}</div>
                                             </div>
                                         ))}
-                                        <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
-                                            <div className="text-primary font-bold mb-1">Final Output</div>
-                                            <div className="whitespace-pre-wrap">{workflowResult.final_output}</div>
-                                        </div>
+
+                                        {workflowType === 'parallel' && workflowResult.results && workflowResult.results.map((res: any, i: number) => (
+                                            <div key={i} className="p-3 bg-black/20 rounded-lg border border-border/50">
+                                                <div className="text-primary font-bold mb-1">Agent: {res.agent}</div>
+                                                <div className="whitespace-pre-wrap text-muted-foreground">{res.output}</div>
+                                            </div>
+                                        ))}
+
+                                        {workflowType === 'sequential' && (
+                                            <div className="p-3 bg-primary/10 rounded-lg border border-primary/20">
+                                                <div className="text-primary font-bold mb-1">Final Output</div>
+                                                <div className="whitespace-pre-wrap">{workflowResult.final_output}</div>
+                                            </div>
+                                        )}
                                     </>
                                 ) : (
                                     <div className="text-center text-muted-foreground mt-10">Run a workflow to see the trace here.</div>

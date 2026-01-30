@@ -5,8 +5,7 @@ from langchain_groq import ChatGroq
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate
-from app.agent.tools.calculator import calculator
-from app.agent.tools.search import search
+from app.agent.tool_registry import tool_registry
 
 class Agent:
     def __init__(self, provider: str = "openai", model_name: str = "gpt-3.5-turbo", temperature: float = 0.7, tools_enabled: bool = False):
@@ -15,7 +14,11 @@ class Agent:
         self.temperature = temperature
         self.tools_enabled = tools_enabled
         self.llm = self._get_llm(provider, model_name, temperature)
-        self.tools = [calculator, search] if tools_enabled else []
+        
+        # Determine strict list of tools based on config if needed, or allow all registered
+        # For now, let's enable all registered tools if tools_enabled is True
+        # In future, AgentDefinition will specify exact tools
+        self.tools = [t.func for t in tool_registry.get_all_tools()] if tools_enabled else []
         
         if self.tools_enabled:
             # Setup ReAct / Tool Calling Agent

@@ -34,3 +34,17 @@ async def run_sequential_workflow(request: RunWorkflowRequest):
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/workflow/parallel")
+async def run_parallel_workflow(request: RunWorkflowRequest):
+    try:
+        workflow_steps = [
+            WorkflowStep(agent_id=step['agent_id'], instruction=step['instruction']) 
+            for step in request.steps
+        ]
+        result = await orchestrator.run_parallel(workflow_steps, request.initial_input)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

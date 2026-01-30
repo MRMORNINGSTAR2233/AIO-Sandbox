@@ -21,11 +21,27 @@ async def get_api_key(api_key_header: str = Security(api_key_header)):
 
 from app.rl.router import router as rl_router
 from app.agent.router import router as agent_router
+from app.sandbox.router import router as sandbox_router
+from app.eval.router import router as eval_router
+from app.agent.tools_router import router as tools_router
+from app.memory.router import router as memory_router
+from app.observability.router import router as obs_router
+from app.safety.limiter import limiter, _rate_limit_exceeded_handler, RateLimitExceeded
+from fastapi import Request
 
 app = FastAPI(title="AI Sandbox API", dependencies=[Depends(get_api_key)])
 
+# Rate Limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 app.include_router(rl_router)
 app.include_router(agent_router)
+app.include_router(sandbox_router)
+app.include_router(eval_router)
+app.include_router(tools_router)
+app.include_router(memory_router)
+app.include_router(obs_router)
 agent_service = AgentService()
 
 class ChatRequest(BaseModel):
@@ -44,11 +60,12 @@ def health_check():
     return {"status": "healthy"}
 
 @app.post("/chat")
-async def chat(request: ChatRequest):
+@limiter.limit("10/minute")
+async def chat(request: ChatRequest, request_context: Request): # Request context needed for limiter
     try:
         # Update config with mode
-        agent_service.update_agent_config(request.provider, request.model, request.temperature, request.mode)
-        response = await agent_service.process_message(request.message)
+        agent_service.agent.update_config(request.provider, request.model, request.temperature, request.mode == "agent")
+        response = await agent_service.process_message(request.message, use_rag=request.use_rag)
         return {"response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

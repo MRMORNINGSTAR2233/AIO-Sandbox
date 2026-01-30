@@ -2,14 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bot, Activity, Home, Settings, Box } from "lucide-react";
+import { Bot, Activity, Home, Settings, Box, BarChart2, Wrench, Code, Database, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
     { label: "Dashboard", href: "/", icon: Home },
     { label: "Agents & LLMs", href: "/agents", icon: Bot },
     { label: "Multi-Agent Workflows", href: "/multi-agent", icon: Settings },
-    { label: "RL Environments", href: "/rl", icon: Activity },
+    { label: "Tool Ecosystem", href: "/tools", icon: Wrench },
+    { label: "Code Sandbox", href: "/sandbox", icon: Box },
+    { label: "Knowledge Base", href: "/memory", icon: Database },
+    { label: "LLM Evaluation", href: "/eval", icon: BarChart2 },
+    { label: "Observability", href: "/observability", icon: Eye },
+    { label: "RL Studio", href: "/rl-studio", icon: Code },
+    { label: "RL Dashboard", href: "/rl", icon: Activity },
 ];
 
 export default function Sidebar() {

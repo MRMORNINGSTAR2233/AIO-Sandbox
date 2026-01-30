@@ -66,3 +66,22 @@ def step_env(request: StepRequest):
 def close_env(session_id: str):
     env_manager.close(session_id)
     return {"status": "closed"}
+
+from app.rl.sb3_service import sb3_service
+
+class TrainRequest(BaseModel):
+    env_id: str
+    algo: str = "PPO"
+    timesteps: int = 10000
+
+@router.post("/train")
+def train_agent(request: TrainRequest):
+    session_id = sb3_service.train(request.env_id, request.algo, request.timesteps)
+    return {"session_id": session_id, "status": "started"}
+
+@router.get("/train/{session_id}")
+def get_training_status(session_id: str):
+    status = sb3_service.get_status(session_id)
+    if not status:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return status

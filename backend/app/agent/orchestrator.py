@@ -40,8 +40,6 @@ class Orchestrator:
             agent_instance = self._get_or_create_agent(agent_def)
             
             # Construct a prompt that includes the instruction and the input
-            # If it's the first step, input is user input.
-            # If subsequent, input is previous agent's output.
             combined_prompt = f"{step.instruction}\n\nInput Context:\n{current_input}"
             
             print(f"--- Running Step {i+1}: {agent_def.name} ({agent_def.role}) ---")
@@ -59,6 +57,38 @@ class Orchestrator:
         return {
             "final_output": current_input,
             "trace": results
+        }
+
+    async def run_parallel(self, steps: List[WorkflowStep], initial_input: str) -> Dict[str, Any]:
+        """
+        Executes multiple agents in parallel with the same input.
+        Useful for brainstorming, voting, or multi-perspective analysis.
+        """
+        tasks = []
+        for step in steps:
+            agent_def = registry.get_agent(step.agent_id)
+            if not agent_def:
+                raise ValueError(f"Agent {step.agent_id} not found.")
+            
+            agent_instance = self._get_or_create_agent(agent_def)
+            combined_prompt = f"{step.instruction}\n\nInput Context:\n{initial_input}"
+            tasks.append(agent_instance.chat(combined_prompt))
+            
+        # Run all
+        print(f"--- Running {len(tasks)} Parallel Steps ---")
+        outputs = await asyncio.gather(*tasks)
+        
+        results = []
+        for i, output in enumerate(outputs):
+            results.append({
+                "step": "parallel",
+                "agent": steps[i].agent_id, 
+                "output": output
+            })
+            
+        return {
+            "mode": "parallel",
+            "results": results
         }
 
 # Global Orchestrator
