@@ -19,8 +19,13 @@ async def get_api_key(api_key_header: str = Security(api_key_header)):
         status_code=HTTP_403_FORBIDDEN, detail="Could not validate credentials"
     )
 
+from app.rl.router import router as rl_router
+from app.agent.router import router as agent_router
+
 app = FastAPI(title="AI Sandbox API", dependencies=[Depends(get_api_key)])
+
 app.include_router(rl_router)
+app.include_router(agent_router)
 agent_service = AgentService()
 
 class ChatRequest(BaseModel):

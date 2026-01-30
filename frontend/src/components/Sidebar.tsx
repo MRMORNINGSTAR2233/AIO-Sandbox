@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
     { label: "Dashboard", href: "/", icon: Home },
     { label: "Agents & LLMs", href: "/agents", icon: Bot },
+    { label: "Multi-Agent Workflows", href: "/multi-agent", icon: Settings },
     { label: "RL Environments", href: "/rl", icon: Activity },
 ];
 
